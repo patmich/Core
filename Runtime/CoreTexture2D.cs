@@ -248,7 +248,7 @@ namespace LLT
 	
 	    public static CoreRect[] Pack(CoreTexture2D[] originals, out CoreTexture2D atlas, int padding)
 	    {
-	        var textures = originals.ToArray();//.OrderByDescending((x) => 2 * x.Width + 2 * x.Height).ToArray();
+	        var textures = originals.OrderByDescending((x) => 2 * x.Width + 2 * x.Height).ToArray();
 	        var root = new PackNode(new CoreRect(0, 0, 0, 0), 2);
 	
 	        for (var index = 0; index < textures.Length; index++)
