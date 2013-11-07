@@ -174,7 +174,7 @@ namespace LLT
 	
 	    public static Func<string, CoreTexture2D> PngDecoder;
 	    public static Action<string, CoreTexture2D> PngEncoder;
-	    private static int _maxTextureSize = 4096;
+	    private static int _maxTextureSize = 1 << 15;
 	
 	    private int _width;
 	    private int _height;	
