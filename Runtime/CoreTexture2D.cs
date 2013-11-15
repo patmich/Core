@@ -239,7 +239,7 @@ namespace LLT
 	            }
 	        }
 	    }
-	
+        
 	    public void Save(string path)
 	    {
 	        CoreAssert.Fatal(Path.GetExtension(path) == ".png" && PngEncoder != null);
@@ -260,11 +260,10 @@ namespace LLT
 			if((_maxTextureSize - 2 * padding) < textures[0].Width || (_maxTextureSize - 2 * padding) < textures[0].Height)
 			{
 				atlas = textures[0];
-
 				uv = new CoreRect[originals.Length];
 
 				var originalIndex = Array.IndexOf(originals, atlas);
-				uv[originalIndex] = new CoreRect(0, 0, 1, 1);
+				uv[originalIndex] = new CoreRect(padding / (float)atlas.Width, padding / (float)atlas.Height, (atlas.Width - 2 * padding) / (float)atlas.Width, (atlas.Height - 2 * padding) / (float)atlas.Height);
 				originals[originalIndex] = null;
 
 				return originals;
