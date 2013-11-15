@@ -220,7 +220,7 @@ namespace LLT
 	
 	    public CoreTexture2D(string path)
 	    {
-	        CoreAssert.Fatal(Path.GetExtension(path) == "png" && PngDecoder != null);
+	        CoreAssert.Fatal(Path.GetExtension(path) == ".png" && PngDecoder != null);
 	        var texture2D = PngDecoder(path);
 	
 	        _width = texture2D.Width;
@@ -242,7 +242,7 @@ namespace LLT
 	
 	    public void Save(string path)
 	    {
-	        CoreAssert.Fatal(Path.GetExtension(path) == "png" && PngEncoder != null);
+	        CoreAssert.Fatal(Path.GetExtension(path) == ".png" && PngEncoder != null);
 	        PngEncoder(path, this);
 	    }
 	

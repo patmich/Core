@@ -8,15 +8,6 @@ namespace LLT
 {
 	public static class CoreAssert
 	{
-		private static Action<string, object> _log;
-		private static Action _break;
-
-		public static void Init(Action<string, object> log, Action break_)
-		{
-			_log = log;
-			_break = break_;
-		}
-		
 		/// <summary>
 		/// Fatal assert.
 		/// </summary>
@@ -46,14 +37,7 @@ namespace LLT
 	    {
 	        if (!value)
 	        {
-				if(_log != null)
-				{
-	            	_log(message, null);
-				}
-				if(_break != null)
-				{
-					_break();
-				}
+				throw new Exception(message);
 	        }
 	    }
 	}
