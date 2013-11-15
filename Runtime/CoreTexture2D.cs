@@ -174,7 +174,7 @@ namespace LLT
 	
 	    public static Func<string, CoreTexture2D> PngDecoder;
 	    public static Action<string, CoreTexture2D> PngEncoder;
-	    private static int _maxTextureSize = 1 << 15;
+	    private static int _maxTextureSize = 2048;
 	
 	    private int _width;
 	    private int _height;	
@@ -246,12 +246,33 @@ namespace LLT
 	        PngEncoder(path, this);
 	    }
 	
-	    public static CoreRect[] Pack(CoreTexture2D[] originals, out CoreTexture2D atlas, int padding)
+		public static CoreTexture2D[] Pack(CoreTexture2D[] originals, int padding, out CoreTexture2D atlas, out CoreRect[] uv)
 	    {
-	        var textures = originals.OrderByDescending((x) => 2 * x.Width + 2 * x.Height).ToArray();
-	        var root = new PackNode(new CoreRect(0, 0, 0, 0), 2);
+			var textures = originals.Where(x=>x != null).OrderByDescending(x=>x.Width > _maxTextureSize ? 1 : 0).ThenByDescending(x=>x.Height > _maxTextureSize ? 1 : 0).ThenByDescending((x) => 2 * x.Width + 2 * x.Height).ToArray();
+
+			if(textures.Length == 0)
+			{
+				atlas = null;
+				uv = new CoreRect[originals.Length];
+				return originals;
+			}
+
+			if((_maxTextureSize - 2 * padding) < textures[0].Width || (_maxTextureSize - 2 * padding) < textures[0].Height)
+			{
+				atlas = textures[0];
+
+				uv = new CoreRect[originals.Length];
+
+				var originalIndex = Array.IndexOf(originals, atlas);
+				uv[originalIndex] = new CoreRect(0, 0, 1, 1);
+				originals[originalIndex] = null;
+
+				return originals;
+			}
+
+	        var root = new PackNode(new CoreRect(0, 0, 0, 0), padding);
 	
-	        for (var index = 0; index < textures.Length; index++)
+			for ( var index = 0; index < textures.Length; index++)
 	        {
 	            var texture2D = textures[index];
 	
@@ -261,7 +282,7 @@ namespace LLT
 	                var grown = PackNode.GrowFromRoot(root, texture2D.Width, texture2D.Height);
 	                if (grown == null)
 	                {
-	                    throw new System.Exception("Atlas is full");
+	                    break;
 	                }
 	                else
 	                {
@@ -277,7 +298,8 @@ namespace LLT
 	
 	        int width = CoreMath.NextPowerOfTwo(root.Rect.Width);
 	        int height = CoreMath.NextPowerOfTwo(root.Rect.Height);
-	        var rects = new CoreRect[textures.Length];
+	        
+			uv = new CoreRect[originals.Length];
 	
 	        atlas = new CoreTexture2D(width, height);
 	        var packNodes = root.PackNodes();
@@ -288,10 +310,13 @@ namespace LLT
 	                continue;
 	
 	            atlas.SetPixels((int)packNode.Rect.X, (int)packNode.Rect.Y, packNode.Texture);
-	            rects[Array.IndexOf(originals, packNode.Texture)] = new CoreRect((packNode.Rect.X + padding) / (float)atlas.Width, (packNode.Rect.Y+padding)/ (float)atlas.Height, (packNode.Texture.Width-2*padding)/(float)atlas.Width, (packNode.Texture.Height-2*padding)/(float)atlas.Height);
+
+				var originalIndex = Array.IndexOf(originals, packNode.Texture);
+				uv[originalIndex] = new CoreRect((packNode.Rect.X + padding) / (float)atlas.Width, (packNode.Rect.Y+padding)/ (float)atlas.Height, (packNode.Texture.Width-2*padding)/(float)atlas.Width, (packNode.Texture.Height-2*padding)/(float)atlas.Height);
+				originals[originalIndex] = null;
 	        }
 	
-	        return rects;
+			return originals;
 	    }
 	}
 }

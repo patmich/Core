@@ -2,7 +2,7 @@ using System;
 
 namespace LLT
 {
-	public struct CoreRect
+	public class CoreRect
 	{
 	    public float X;
 	
