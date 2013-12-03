@@ -230,7 +230,7 @@ namespace LLT
 	
 	    public void SetPixels(int x, int y, CoreTexture2D other)
 	    {
-	        CoreAssert.Fatal(x + other.Width < Width && y + other.Height < Height, "Texture does not fit.");
+            CoreAssert.Fatal(x + other.Width <= Width && y + other.Height <= Height, "Texture does not fit: " + (x + other.Width) + "x" + (y + other.Height) + " " + Width + "x" + Height);
 	        for(var j = 0; j < other.Height; j++)
 	        {
 	            for (var i = 0; i < other.Width; i++)
@@ -248,8 +248,33 @@ namespace LLT
 	
 		public static CoreTexture2D[] Pack(CoreTexture2D[] originals, int padding, out CoreTexture2D atlas, out CoreRect[] uv)
 	    {
+            //var textures = originals.Where(x=>x != null).ToList();
+            /*textures.Sort((x,y)=>
+            {
+                if(x.Width > _maxTextureSize || x.Height > _maxTextureSize)
+                {
+                    return -1;
+                }
+
+                if(y.Width > _maxTextureSize || y.Height > _maxTextureSize)
+                {
+                    return 1;
+                }
+
+                var px = 2 * x.Width + 2 * x.Height;
+                var py = 2 * y.Width + 2 * y.Height;
+
+                if((Math.Max(px, py)/(float)Math.Min(px, py)) < 2)
+                {
+                    //return -1;
+                }
+
+                var retVal = py.CompareTo(px);
+                return retVal;
+            }); */
 			var textures = originals.Where(x=>x != null).OrderByDescending(x=>x.Width > _maxTextureSize ? 1 : 0).ThenByDescending(x=>x.Height > _maxTextureSize ? 1 : 0).ThenByDescending((x) => 2 * x.Width + 2 * x.Height).ToArray();
 
+            var temp = textures.ToArray();
 			if(textures.Length == 0)
 			{
 				atlas = null;
@@ -257,7 +282,9 @@ namespace LLT
 				return originals;
 			}
 
-			if((_maxTextureSize - 2 * padding) < textures[0].Width || (_maxTextureSize - 2 * padding) < textures[0].Height)
+
+            var squareness = Math.Max(textures[0].Width, textures[0].Height)/(float)Math.Min(textures[0].Width, textures[0].Height);
+            if((_maxTextureSize - 2 * padding) < textures[0].Width || (_maxTextureSize - 2 * padding) < textures[0].Height)/* || (squareness < 2 && (textures[0].Width * textures[0].Height > (_maxTextureSize * _maxTextureSize) / 4))*/
 			{
 				atlas = textures[0];
 				uv = new CoreRect[originals.Length];

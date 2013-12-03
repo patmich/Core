@@ -7,5 +7,6 @@ namespace LLT
         void Pause();
         float Length { get; }
         float Speed { set; }
+        bool Loop { get; set; }
     }
 }
