@@ -37,7 +37,7 @@ namespace LLT
 	    {
 	        if (!value)
 	        {
-				throw new Exception(message);
+				UnityEngine.Debug.LogError(message);
 	        }
 	    }
 	}
